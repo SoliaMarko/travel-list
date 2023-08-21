@@ -1,17 +1,22 @@
 import { useState } from "react";
 
-const initialItems = [
-  { id: 1, description: "Passports", quantity: 2, isPacked: false },
-  { id: 2, description: "Socks", quantity: 12, isPacked: false },
-  { id: 3, description: "Charger", quantity: 1, isPacked: true },
-];
-
 export default function App() {
+  const [items, setItems] = useState([]);
+
+  function handleAddItems(item) {
+    setItems(items => [...items, item]);
+  }
+
+  function handleDeleteItem(id) {
+    console.log(id);
+    setItems(items => items.filter(item => item.id !== id));
+  }
+
   return (
     <div className="app">
       <Logo />
-      <Form />
-      <PackingList />
+      <Form onAddItems={handleAddItems} />
+      <PackingList items={items} onDeleteItem={handleDeleteItem} />
       <Stats />
     </div>
   );
@@ -23,7 +28,7 @@ function Logo() {
 
 const quantityOptions = Array.from({ length: 20 }, (_, i) => i + 1);
 
-function Form() {
+function Form({ onAddItems }) {
   const [description, setDescription] = useState("");
   const [quantity, setQuantity] = useState(1);
 
@@ -34,6 +39,8 @@ function Form() {
 
     const newItem = { description, quantity, packed: false, id: Date.now() };
     console.log(newItem);
+
+    onAddItems(newItem);
 
     setDescription("");
     setQuantity(1);
@@ -60,26 +67,26 @@ function Form() {
   );
 }
 
-function PackingList() {
+function PackingList({ items, onDeleteItem }) {
   return (
     <div className="list">
       <ul>
-        {initialItems.map(item => (
-          <Item item={item} key={item.description} />
+        {items.map(item => (
+          <Item key={item.id} item={item} onDeleteItem={onDeleteItem} />
         ))}
       </ul>
     </div>
   );
 }
 
-function Item({ item }) {
-  const { description, quantity, isPacked } = item;
+function Item({ item, onDeleteItem }) {
+  const { id, description, quantity, isPacked } = item;
   return (
     <li>
       <span style={isPacked ? { textDecoration: "line-through" } : {}}>
         {quantity} {description}
       </span>
-      <button>❌</button>
+      <button onClick={() => onDeleteItem(id)}>❌</button>
     </li>
   );
 }
